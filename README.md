@@ -26,7 +26,7 @@ A sleek, responsive, and fully functional **Todo List** built with **Vanilla Jav
 
 | Desktop | Mobile |
 |--------|--------|
-| ![Desktop Screenshot](./screenshots/todo-screenshot.png)') | ![Mobile Screenshot](./screenshots/mobile.png) |
+| ![Desktop Screenshot](./screenshots/todo-screenshot.png)') 
 
 ---
 
