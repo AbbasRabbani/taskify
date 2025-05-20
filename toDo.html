@@ -1,34 +1,126 @@
-<!-- Create a todo list app capable of storing your toDO in local Storage, Add an option to create, delete and access all the todos-->
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TO_DO List</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced To-Do List</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gradient-to-br from-indigo-200 to-purple-200 min-h-screen flex items-center justify-center">
-  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md">
-    <h1 class="text-2xl font-bold mb-4 text-center text-indigo-700"> 📝 To-Do List</h1>
-    <div class="flex mb-4">
-      <input id="todo-input" type="text" placeholder="Add a new task..."
-        class="flex-grow p-2 border rounded-l-md outline-none" />
-      <button onclick="addTodo()" class="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700">
-        Add
-      </button>
+<body class="bg-gradient-to-br from-indigo-200 to-purple-200 min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-xl">
+    <h1 class="text-2xl font-bold mb-4 text-center text-indigo-700">📝 Enhanced To-Do List</h1>
+
+    <div class="flex mb-4 gap-2">
+      <input id="todo-input" type="text" placeholder="Task description..."
+        class="flex-grow p-2 border rounded-md outline-none">
+      <input id="due-date" type="date" class="p-2 border rounded-md">
+      <button onclick="addTodo()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Add</button>
     </div>
+
+    <input id="search" type="text" placeholder="Search tasks..." class="w-full mb-4 p-2 border rounded-md outline-none"
+      oninput="renderTodos()">
+
     <ul id="todo-list" class="space-y-2"></ul>
   </div>
 
   <script>
-    let todos = JSON.parse(localStorage.getItem('todos')) || [];
-    const todoInput = document.getElementById('todo-input');
-    const todoList = document.getElementById('todo-list');
-  </script>
+    let rawTodos = JSON.parse(localStorage.getItem('todos')) || [];
+    let todos = Array.isArray(rawTodos) ? rawTodos.filter(t => t && typeof t.text === 'string') : [];
 
+    const todoInput = document.getElementById('todo-input');
+    const dueDateInput = document.getElementById('due-date');
+    const todoList = document.getElementById('todo-list');
+    const searchInput = document.getElementById('search');
+
+    function renderTodos() {
+      const filter = searchInput.value.toLowerCase();
+      todoList.innerHTML = '';
+
+      todos.forEach((todo, index) => {
+        if (todo?.text?.toLowerCase().includes(filter)) {
+          const li = document.createElement('li');
+          li.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-100 rounded px-3 py-2 gap-2";
+
+          const info = document.createElement('div');
+          info.className = "flex items-center gap-2";
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = todo.completed;
+          checkbox.onchange = () => toggleComplete(index);
+
+          const span = document.createElement('span');
+          span.textContent = todo.text + (todo.dueDate ? ` (Due: ${todo.dueDate})` : '');
+          span.className = todo.completed ? 'line-through text-gray-500' : 'text-gray-800';
+
+          info.appendChild(checkbox);
+          info.appendChild(span);
+
+          const actions = document.createElement('div');
+          actions.className = "flex gap-2";
+
+          const editBtn = document.createElement('button');
+          editBtn.textContent = 'Edit';
+          editBtn.className = "text-blue-500 text-sm hover:underline";
+          editBtn.onclick = () => editTodo(index);
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.className = "text-red-500 text-sm hover:underline";
+          deleteBtn.onclick = () => deleteTodo(index);
+
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+
+          li.appendChild(info);
+          li.appendChild(actions);
+          todoList.appendChild(li);
+        }
+      });
+    }
+
+    function addTodo() {
+      const text = todoInput.value.trim();
+      const dueDate = dueDateInput.value;
+      if (text) {
+        todos.push({ text, dueDate, completed: false });
+        updateLocalStorage();
+        renderTodos();
+        todoInput.value = '';
+        dueDateInput.value = '';
+      }
+    }
+
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      updateLocalStorage();
+      renderTodos();
+    }
+
+    function toggleComplete(index) {
+      todos[index].completed = !todos[index].completed;
+      updateLocalStorage();
+      renderTodos();
+    }
+
+    function editTodo(index) {
+      const newText = prompt("Edit task:", todos[index].text);
+      if (newText !== null) {
+        todos[index].text = newText.trim() || todos[index].text;
+        updateLocalStorage();
+        renderTodos();
+      }
+    }
+
+    function updateLocalStorage() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    renderTodos();
+  </script>
 </body>
 
 </html>
